@@ -11,6 +11,7 @@ from __future__ import print_function, division
 import pickle
 from collections import OrderedDict
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 import time
 from pkg_resources import parse_version
 
@@ -394,7 +395,14 @@ if __name__ == '__main__':
     WEBSITE = input()
 
     DRIVERPATH = './chromedriver'
-    DRIVER = webdriver.Chrome(DRIVERPATH)
+    WINDOW_SIZE = "1366,768"
+    CHROME_PATH = '/usr/bin/chromium'
+    chrome_options = Options()  
+    chrome_options.add_argument("--headless")  
+    chrome_options.add_argument("--window-size=%s" % WINDOW_SIZE)
+    chrome_options.binary_location = CHROME_PATH
+
+    DRIVER = webdriver.Chrome(executable_path=DRIVERPATH, options=chrome_options)
     DRIVER.get(WEBSITE)
     time.sleep(5)
     DRIVER.save_screenshot('original.png')
