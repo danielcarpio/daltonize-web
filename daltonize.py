@@ -1,18 +1,18 @@
 #!/usr/bin/env python
 
 """
+   Modified by Daniel Carpio <danielcarpioc@gmail.com>
    Written by Joerg Dietrich <astro@joergdietrich.com>. Copyright 2015
    Based on original code by Oliver Siemoneit. Copyright 2007
    This code is licensed under the GNU GPL version 2, see COPYING for details.
 """
 
 from __future__ import print_function, division
-
+import pickle
 from collections import OrderedDict
-try:
-    import pickle
-except ImportError:
-    import cPickle as pickle  # pylint: disable=import-error
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+import time
 from pkg_resources import parse_version
 
 from PIL import Image
@@ -84,35 +84,6 @@ def simulate(img, color_deficit="d"):
     # Transform back to RBG
     sim_rgb = transform_colorspace(sim_lms, lms2rgb)
     return sim_rgb
-
-
-def daltonize(rgb, color_deficit='d'):
-    """
-    Adjust color palette of an image to compensate color blindness.
-
-    Arguments:
-    ----------
-    rgb : array of shape (M, N, 3)
-        original image in RGB format
-    color_deficit : {"d", "p", "t"}, optional
-        type of colorblindness, d for deuteronopia (default),
-        p for protonapia,
-        t for tritanopia
-
-    Returns:
-    --------
-    dtpn : array of shape (M, N, 3)
-        image in RGB format with colors adjusted
-    """
-    sim_rgb = simulate(rgb, color_deficit)
-    err2mod = np.array([[0, 0, 0], [0.7, 1, 0], [0.7, 0, 1]])
-    # rgb - sim_rgb contains the color information that dichromats
-    # cannot see. err2mod rotates this to a part of the spectrum that
-    # they can see.
-    rgb = rgb.convert('RGB')
-    err = transform_colorspace(rgb - sim_rgb, err2mod)
-    dtpn = err + rgb
-    return dtpn
 
 
 def array_to_img(arr):
@@ -418,70 +389,34 @@ def simulate_mpl(fig, color_deficit='d', copy=False):
     return fig
 
 
-def daltonize_mpl(fig, color_deficit='d', copy=False):
-    """
-    Daltonize a matplotlib figure.
-
-    Arguments:
-    ----------
-    fig : matplotlib.figure.Figure
-    color_deficit : {"d", "p", "t"}, optional
-        type of colorblindness, d for deuteronopia (default),
-        p for protonapia,
-        t for tritanopia
-    copy : bool, optional
-        should daltonization happen on a copy (True) or the original
-        (False, default)
-
-    Returns:
-    --------
-    fig : matplotlib.figure.Figure
-    """
-    if copy:
-        # mpl.transforms cannot be copy.deepcopy()ed. Thus we resort
-        # to pickling.
-        pfig = pickle.dumps(fig)
-        fig = pickle.loads(pfig)
-    rgb, alpha, mpl_colors = _prepare_for_transform(fig)
-    dtpn = daltonize(array_to_img(rgb * 255), color_deficit) / 255
-    rgba = _join_rgb_alpha(dtpn, alpha)
-    set_mpl_colors(mpl_colors, rgba)
-    fig.canvas.draw()
-    return fig
-
-
 if __name__ == '__main__':
-    import argparse
+    print("Welcome to the website emulator for color blindness.")
+    print("Please, write the url you want to simulate:")
+    WEBSITE = input()
 
-    # pylint: disable=invalid-name
-    parser = argparse.ArgumentParser()
-    parser.add_argument("input_image", type=str)
-    parser.add_argument("output_image", type=str)
-    group = parser.add_mutually_exclusive_group()
-    group.add_argument("-s", "--simulate", help="create simulated image",
-                       action="store_true")
-    group.add_argument("-d", "--daltonize",
-                       help="adjust image color palette for color blindness",
-                       action="store_true")
-    parser.add_argument("-t", "--type", type=str, choices=["d", "p", "t"],
-                        help="type of color blindness (deuteranopia, "
-                        "protanopia, tritanopia), default is deuteranopia "
-                        "(most common)")
-    args = parser.parse_args()
+    DRIVERPATH = './chromedriver'
+    WINDOW_SIZE = "1366,768"
+    CHROME_PATH = '/usr/bin/chromium'
+    chrome_options = Options()  
+    chrome_options.add_argument("--headless")  
+    chrome_options.add_argument("--window-size=%s" % WINDOW_SIZE)
+    chrome_options.binary_location = CHROME_PATH
 
-    if args.simulate is False and args.daltonize is False:
-        print("No action specified, assume daltonizing")
-        args.daltonize = True
-    if args.type is None:
-        args.type = "d"
+    DRIVER = webdriver.Chrome(executable_path=DRIVERPATH, options=chrome_options)
+    DRIVER.get(WEBSITE)
+    time.sleep(5)
+    DRIVER.save_screenshot('original.png')
+    DRIVER.quit()
 
-    orig_img = Image.open(args.input_image)
+    for tipo in ["d", "p", "t"]:
 
-    if args.simulate:
-        simul_rgb = simulate(orig_img, args.type)
+        orig_img = Image.open("original.png")
+
+        simul_rgb = simulate(orig_img, tipo)
         simul_img = array_to_img(simul_rgb)
-        simul_img.save(args.output_image)
-    if args.daltonize:
-        dalton_rgb = daltonize(orig_img, args.type)
-        dalton_img = array_to_img(dalton_rgb)
-        dalton_img.save(args.output_image)
+        if tipo == "d":
+            simul_img.save("deuteranopia.png")
+        elif tipo == "p":
+            simul_img.save("protanopia.png")
+        else:
+            simul_img.save("tritanopia.png")
