@@ -395,8 +395,8 @@ if __name__ == '__main__':
 
     DRIVERPATH = './chromedriver'
     DRIVER = webdriver.Chrome(DRIVERPATH)
-    time.sleep(5)
     DRIVER.get(WEBSITE)
+    time.sleep(5)
     DRIVER.save_screenshot('original.png')
     DRIVER.quit()
 
