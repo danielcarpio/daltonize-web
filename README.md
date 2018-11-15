@@ -29,7 +29,7 @@ This software only works on Linux
 As a command line tool:
 
 ```
-$ daltonize.py
+$ python daltonize.py
 ```
 
 and follow the steps.
