@@ -10,9 +10,10 @@
 from __future__ import print_function, division
 import pickle
 from collections import OrderedDict
+import time
+from pathlib import Path
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-import time
 from pkg_resources import parse_version
 
 from PIL import Image
@@ -389,19 +390,38 @@ def simulate_mpl(fig, color_deficit='d', copy=False):
     return fig
 
 def takeScreenshot(url):
-    DRIVERPATH = './chromedriver'
-    WINDOW_SIZE = "1366,768"
-    CHROME_PATH = '/usr/bin/chromium'
-    chrome_options = Options()  
-    chrome_options.add_argument("--headless")  
-    chrome_options.add_argument("--window-size=%s" % WINDOW_SIZE)
-    chrome_options.binary_location = CHROME_PATH
+    """
+    This function check which browser you have installed (currently only check Chromium and
+    Firefox), open it with the given url and take a screenshot named original.png
+    
+    Arguments:
+    ----------
+    url : url of the website you want to take a screenshot
 
-    DRIVER = webdriver.Chrome(executable_path=DRIVERPATH, options=chrome_options)
-    DRIVER.get(url)
-    time.sleep(5)
-    DRIVER.save_screenshot('original.png')
-    DRIVER.quit()
+    Returns:
+    --------
+    Nothing
+    """
+    if Path("/usr/bin/chromium").is_file():
+        driverpath = './drivers/chromedriver'
+        windowSize = "1366,768"
+        chromePath = '/usr/bin/chromium'
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")  
+        chrome_options.add_argument("--window-size=%s" % windowSize)
+        chrome_options.binary_location = chromePath
+
+        driver = webdriver.Chrome(executable_path=driverpath, options=chrome_options)
+        driver.get(url)
+        time.sleep(5)
+        driver.save_screenshot('original.png')
+        driver.quit()
+    elif Path("/usr/bin/firefox").is_file():
+        driver = webdriver.Firefox(executable_path="./drivers/geckodriver")
+        driver.get(url)
+        time.sleep(5)
+        driver.save_screenshot('original.png')
+        driver.quit()
 
 if __name__ == '__main__':
     print("Welcome to the website emulator for color blindness.")
