@@ -30,10 +30,10 @@ As a command line tool:
 
 ```
 $ daltonize.py
+```
 
 and follow the steps.
 
-```
 
 ## Credits
 
