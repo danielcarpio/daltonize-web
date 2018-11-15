@@ -388,12 +388,7 @@ def simulate_mpl(fig, color_deficit='d', copy=False):
     fig.canvas.draw()
     return fig
 
-
-if __name__ == '__main__':
-    print("Welcome to the website emulator for color blindness.")
-    print("Please, write the url you want to simulate:")
-    WEBSITE = input()
-
+def takeScreenshot(url):
     DRIVERPATH = './chromedriver'
     WINDOW_SIZE = "1366,768"
     CHROME_PATH = '/usr/bin/chromium'
@@ -403,11 +398,17 @@ if __name__ == '__main__':
     chrome_options.binary_location = CHROME_PATH
 
     DRIVER = webdriver.Chrome(executable_path=DRIVERPATH, options=chrome_options)
-    DRIVER.get(WEBSITE)
+    DRIVER.get(url)
     time.sleep(5)
     DRIVER.save_screenshot('original.png')
     DRIVER.quit()
 
+if __name__ == '__main__':
+    print("Welcome to the website emulator for color blindness.")
+    print("Please, write the url you want to simulate:")
+    website = input()
+    takeScreenshot(website)
+    
     for tipo in ["d", "p", "t"]:
 
         orig_img = Image.open("original.png")
