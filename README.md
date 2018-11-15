@@ -33,6 +33,7 @@ $ daltonize.py
 
 and follow the steps.
 
+```
 
 ## Credits
 
