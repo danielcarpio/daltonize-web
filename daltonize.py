@@ -15,7 +15,8 @@ from pathlib import Path
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from pkg_resources import parse_version
-
+from tkinter import *
+from PIL import ImageTk
 from PIL import Image
 import numpy as np
 assert parse_version(np.__version__) >= parse_version('1.9.0'), \
@@ -423,21 +424,61 @@ def takeScreenshot(url):
         driver.save_screenshot('original.png')
         driver.quit()
 
-if __name__ == '__main__':
-    print("Welcome to the website emulator for color blindness.")
-    print("Please, write the url you want to simulate:")
-    website = input()
-    takeScreenshot(website)
     
-    for tipo in ["d", "p", "t"]:
+if __name__ == '__main__':
+    def buttonP():
+        website = inpFe.get()
+        takeScreenshot(website)
+        for tipo in ["d", "p", "t"]:
+            orig_img = Image.open("original.png")
+            simul_rgb = simulate(orig_img, tipo)
+            simul_img = array_to_img(simul_rgb)
+            if tipo == "d":
+                simul_img.save("deuteranopia.png")
+            elif tipo == "p":
+                simul_img.save("protanopia.png")
+            else:
+                simul_img.save("tritanopia.png")
 
-        orig_img = Image.open("original.png")
 
-        simul_rgb = simulate(orig_img, tipo)
-        simul_img = array_to_img(simul_rgb)
-        if tipo == "d":
-            simul_img.save("deuteranopia.png")
-        elif tipo == "p":
-            simul_img.save("protanopia.png")
-        else:
-            simul_img.save("tritanopia.png")
+        w1 = Toplevel(top)
+        w1.title("Original")
+        img1 = ImageTk.PhotoImage(Image.open("original.png"))
+        panel1 = Label(w1, image=img1)
+        panel1.image = img1
+        panel1.pack(side=LEFT, fill="both", expand="yes")
+
+        w2 = Toplevel(top)
+        w2.title("Protanopia")
+        img2 = ImageTk.PhotoImage(Image.open("protanopia.png"))
+        panel2 = Label(w2, image=img2)
+        panel2.image = img2
+        panel2.pack(side=LEFT, fill="both", expand="yes")
+
+        w3 = Toplevel(top)
+        w3.title("Deuteranopia")
+        img3 = ImageTk.PhotoImage(Image.open("deuteranopia.png"))
+        panel3 = Label(w3, image=img3)
+        panel3.image = img3
+        panel3.pack(side=LEFT, fill="both", expand="yes")
+
+        w4 = Toplevel(top)
+        w4.title("Tritanopia")
+        img4 = ImageTk.PhotoImage(Image.open("tritanopia.png"))
+        panel4 = Label(w4, image=img4)
+        panel4.image = img4
+        panel4.pack(side=LEFT, fill="both", expand="yes")
+        
+    top = Tk()
+    top.title("Daltonize-web")
+    fraFe = Frame(top)
+    fraFe.pack()
+    etiFe = Label(fraFe, text='URL: ')
+    etiFe.pack(side=LEFT)
+    inpFe = Entry(fraFe)
+    inpFe.pack(side=LEFT)
+    busBu = Button(fraFe, text='Buscar', command=buttonP)
+    busBu.pack(side=RIGHT)
+    
+    top.mainloop()
+    
