@@ -420,7 +420,6 @@ def takeScreenshot(url):
     elif Path("/usr/bin/firefox").is_file():
         driver = webdriver.Firefox(executable_path="./drivers/geckodriver")
         driver.get(url)
-        time.sleep(5)
         driver.save_screenshot('original.png')
         driver.quit()
 
