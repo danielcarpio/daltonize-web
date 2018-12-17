@@ -10,7 +10,6 @@
 from __future__ import print_function, division
 import pickle
 from collections import OrderedDict
-import time
 from pathlib import Path
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -414,7 +413,6 @@ def takeScreenshot(url):
 
         driver = webdriver.Chrome(executable_path=driverpath, options=chrome_options)
         driver.get(url)
-        time.sleep(5)
         driver.save_screenshot('original.png')
         driver.quit()
     elif Path("/usr/bin/firefox").is_file():
